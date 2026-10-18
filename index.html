@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D3557">
+<title>CONVIVE360</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CONVIVE360">
+<style>
+:root {
+  --tinta: #1D3557;
+  --tinta-2: #2C4A73;
+  --papel: #F4F6F3;
+  --hoja: #FFFFFF;
+  --linea: #D5DBD6;
+  --texto: #1E2422;
+  --suave: #5B6662;
+  --gabinete: #23867A;
+  --direccion: #8A5A00;
+  --alerta: #B42318;
+  --aviso: #FFF4D6;
+  --ok: #2F7D4A;
+  --radio: 10px;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", system-ui, sans-serif;
+  color: var(--texto);
+  background: var(--papel);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); font-size: 16px; line-height: 1.5; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5rem; letter-spacing: -0.01em; }
+h1 { font-size: 1.6rem; } h2 { font-size: 1.25rem; } h3 { font-size: 1.05rem; }
+p { margin: 0 0 .75rem; }
+button, input, select { font: inherit; }
+:focus-visible { outline: 3px solid #E9A23B; outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.btn { border: 1px solid var(--tinta); background: var(--tinta); color: #fff; padding: .6rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn:disabled { opacity: .55; cursor: wait; }
+.btn.sec { background: transparent; color: var(--tinta); }
+.btn.peligro { background: var(--alerta); border-color: var(--alerta); }
+.btn.chico { padding: .35rem .7rem; font-size: .9rem; font-weight: 600; }
+.enlace { background: none; border: 0; color: var(--tinta-2); text-decoration: underline; cursor: pointer; padding: 0; }
+
+label { display: block; font-weight: 600; font-size: .92rem; margin: .9rem 0 .3rem; }
+input, select { width: 100%; padding: .65rem .75rem; border: 1px solid #AEB8B2; border-radius: 8px; background: #fff; color: var(--texto); }
+input:focus, select:focus { border-color: var(--tinta); }
+.ayuda { color: var(--suave); font-size: .86rem; margin-top: .3rem; }
+.error { color: var(--alerta); font-weight: 600; min-height: 1.4em; margin-top: .75rem; }
+.ok { color: var(--ok); font-weight: 600; }
+
+/* Pantallas de acceso */
+.acceso { min-height: 100vh; display: grid; place-items: center; padding: 1.25rem; }
+.acceso .caja { width: 100%; max-width: 400px; background: var(--hoja); border: 1px solid var(--linea); border-radius: 14px; padding: 1.75rem 1.5rem; }
+.acceso .marca { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
+.acceso .marca img { width: 44px; height: 44px; }
+.acceso .marca div { font-weight: 700; font-size: 1.15rem; color: var(--tinta); line-height: 1.2; }
+.acceso .marca small { display: block; font-weight: 500; color: var(--suave); font-size: .85rem; }
+.acceso .btn { width: 100%; margin-top: 1.25rem; padding: .75rem; }
+.acceso .pie { margin-top: 1.25rem; font-size: .88rem; color: var(--suave); text-align: center; }
+
+/* Barra superior */
+.barra { position: sticky; top: 0; z-index: 5; background: var(--tinta); color: #fff; }
+.barra .dentro { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: .75rem; padding: .7rem 1rem; }
+.barra .titulo { font-weight: 700; flex: 1; }
+.barra .estado { font-size: .8rem; padding: .15rem .55rem; border-radius: 99px; background: rgba(255,255,255,.14); }
+.barra .estado.fuera { background: #E9A23B; color: #2B1B00; }
+.barra .cuenta { background: transparent; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 8px; padding: .35rem .7rem; cursor: pointer; }
+.menu { position: absolute; right: 1rem; top: 3.2rem; background: #fff; color: var(--texto); border: 1px solid var(--linea); border-radius: 10px; box-shadow: 0 8px 24px rgba(29,53,87,.18); min-width: 220px; overflow: hidden; }
+.menu button { display: block; width: 100%; text-align: left; padding: .75rem 1rem; background: none; border: 0; cursor: pointer; }
+.menu button:hover { background: var(--papel); }
+
+.pestanas { max-width: 1040px; margin: 0 auto; display: flex; gap: .25rem; padding: 0 1rem; overflow-x: auto; }
+.pestanas button { background: none; border: 0; color: rgba(255,255,255,.75); padding: .6rem .9rem; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; font-weight: 600; }
+.pestanas button[aria-selected="true"] { color: #fff; border-bottom-color: #E9A23B; }
+
+main { max-width: 1040px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+
+/* Credencial: las iniciales son la identidad en cada folio */
+.credencial { display: grid; grid-template-columns: auto 1fr; gap: 1.25rem; align-items: center; background: var(--hoja); border: 1px solid var(--linea); border-left: 6px solid var(--color-area, var(--tinta)); border-radius: var(--radio); padding: 1.25rem; margin-bottom: 1.5rem; }
+.sello { border: 3px solid var(--color-area, var(--tinta)); color: var(--color-area, var(--tinta)); border-radius: 12px; padding: .5rem .9rem; text-align: center; transform: rotate(-3deg); }
+.sello b { display: block; font-size: 2.2rem; letter-spacing: .06em; line-height: 1; }
+.sello span { font-size: .72rem; font-weight: 700; }
+.credencial .area { color: var(--color-area, var(--tinta)); font-weight: 700; }
+.credencial .ejemplo { font-family: inherit; font-variant-numeric: tabular-nums; color: var(--suave); font-size: .9rem; }
+
+.bloque { background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--radio); padding: 1.25rem; margin-bottom: 1.25rem; }
+.encabezado { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.encabezado h2 { margin: 0; }
+.vacio { color: var(--suave); padding: 1rem 0; }
+.aviso { background: var(--aviso); border: 1px solid #E8C873; border-radius: 8px; padding: .8rem 1rem; margin-bottom: 1rem; }
+
+/* Tablas que se vuelven tarjetas en teléfono */
+.tabla { width: 100%; border-collapse: collapse; }
+.tabla th { text-align: left; font-size: .85rem; color: var(--suave); font-weight: 600; padding: .5rem; border-bottom: 2px solid var(--linea); }
+.tabla td { padding: .7rem .5rem; border-bottom: 1px solid var(--linea); vertical-align: top; }
+.tabla .acciones { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; min-width: 15rem; }
+.tabla td[data-t="Último acceso"] { white-space: nowrap; }
+.tabla tr.inactivo td { color: var(--suave); }
+.ini { font-weight: 800; letter-spacing: .05em; }
+.etiqueta { display: inline-block; white-space: nowrap; font-size: .78rem; font-weight: 700; padding: .1rem .5rem; border-radius: 99px; border: 1px solid currentColor; }
+.r-prefectura { color: var(--tinta); } .r-gabinete { color: var(--gabinete); } .r-direccion { color: var(--direccion); }
+.e-baja { color: var(--alerta); } .e-temporal { color: #8A6100; }
+@media (max-width: 720px) {
+  .tabla thead { display: none; }
+  .tabla tr { display: block; border: 1px solid var(--linea); border-radius: 10px; padding: .6rem .8rem; margin-bottom: .75rem; }
+  .tabla td { display: block; border: 0; padding: .2rem 0; }
+  .tabla td[data-t]::before { content: attr(data-t) ": "; color: var(--suave); font-size: .85rem; }
+  .tabla .acciones { justify-content: flex-start; margin-top: .4rem; }
+  .credencial { grid-template-columns: 1fr; }
+  .sello { justify-self: start; }
+}
+
+dialog { border: 0; border-radius: 14px; padding: 0; width: min(480px, calc(100vw - 2rem)); box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+dialog::backdrop { background: rgba(29,53,87,.45); }
+dialog form, dialog .cuerpo { padding: 1.4rem 1.4rem 1.2rem; }
+dialog .botones { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.25rem; flex-wrap: wrap; }
+.credencial-nueva { background: var(--papel); border: 2px dashed var(--tinta); border-radius: 10px; padding: 1rem; margin: 1rem 0; font-size: 1.05rem; }
+.credencial-nueva b { font-size: 1.3rem; letter-spacing: .04em; }
+
+.lista-bitacora li { padding: .55rem 0; border-bottom: 1px solid var(--linea); list-style: none; }
+.lista-bitacora { padding: 0; margin: 0; }
+.lista-bitacora small { color: var(--suave); }
+.toast { position: fixed; left: 50%; bottom: 1.25rem; transform: translateX(-50%); background: var(--texto); color: #fff; padding: .7rem 1.1rem; border-radius: 10px; z-index: 50; max-width: calc(100vw - 2rem); }
+@media (prefers-reduced-motion: no-preference) { dialog[open] { animation: aparecer .16s ease-out; } @keyframes aparecer { from { opacity: 0; transform: translateY(8px); } } }
+</style>
+</head>
+<body>
+
+<!-- ============ CONFIGURAR SERVIDOR ============ -->
+<section id="pConfig" class="acceso" hidden>
+  <div class="caja">
+    <div class="marca"><img src="icon.svg" alt=""><div>CONVIVE360<small>Conectar con la escuela</small></div></div>
+    <p>Pega la dirección del servidor de tu escuela. Solo se hace una vez en este aparato.</p>
+    <label for="cfgUrl">Dirección del servidor</label>
+    <input id="cfgUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="ayuda">Te la da quien administra el sistema. Termina en <b>/exec</b>.</div>
+    <div class="error" id="cfgError" role="alert"></div>
+    <button class="btn" id="cfgGuardar">Conectar</button>
+    <div class="pie" id="cfgVolver" hidden><button class="enlace" data-ir="login">Cancelar</button></div>
+  </div>
+</section>
+
+<!-- ============ INICIAR SESIÓN ============ -->
+<section id="pLogin" class="acceso" hidden>
+  <form class="caja" id="fLogin">
+    <div class="marca"><img src="icon.svg" alt=""><div>CONVIVE360<small>Prefectura · Gabinete · Dirección</small></div></div>
+    <label for="lUsuario">Usuario</label>
+    <input id="lUsuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="lPass">Contraseña</label>
+    <input id="lPass" type="password" autocomplete="current-password" required>
+    <div class="error" id="lError" role="alert"></div>
+    <button class="btn" type="submit" id="lEntrar">Entrar</button>
+    <div id="demoPanel" hidden style="margin-top:1.1rem;border:2px dashed #1BA3A6;border-radius:12px;padding:.85rem;background:#F2FAFA">
+      <div style="font-weight:800;color:#0E7476">Modo demostración</div>
+      <div class="ayuda" style="margin:.2rem 0 .6rem">Escuela ficticia. Entre con un toque a cualquier área, sin contraseña.</div>
+      <div style="display:flex;gap:.45rem;flex-wrap:wrap">
+        <button type="button" data-demo="prefectura" style="flex:1;min-width:6.5rem;border:1px solid #0E7476;background:#fff;color:#0E7476;border-radius:8px;padding:.55rem .4rem;font-weight:700;cursor:pointer">Prefectura</button>
+        <button type="button" data-demo="gabinete" style="flex:1;min-width:6.5rem;border:1px solid #0E7476;background:#fff;color:#0E7476;border-radius:8px;padding:.55rem .4rem;font-weight:700;cursor:pointer">Gabinete</button>
+        <button type="button" data-demo="direccion" style="flex:1;min-width:6.5rem;border:1px solid #0E7476;background:#fff;color:#0E7476;border-radius:8px;padding:.55rem .4rem;font-weight:700;cursor:pointer">Dirección</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:.4rem;font-weight:500;margin:.7rem 0 0"><input type="checkbox" id="demoTour" checked style="width:auto"> Con visita guiada</label>
+    </div>
+    <div class="aviso" data-instalar hidden style="margin-top:1rem"></div>
+    <div class="pie">¿Olvidaste tu contraseña? Pide a Dirección que la restablezca.<br><br>
+      <button class="enlace" type="button" id="lCambiarServidor">Cambiar servidor</button>
+      <span data-instalar-link hidden> · <button class="enlace" type="button" data-instalar-btn>Instalar en este aparato</button></span></div>
+    <p style="margin:1.1rem 0 0;font-size:.72rem;line-height:1.45;color:var(--suave);text-align:center">CONVIVE360 es una herramienta independiente de Weird Games Mx, basada en la normativa de convivencia escolar del Estado de Jalisco. No es un sistema oficial de la Secretaría de Educación Jalisco ni cuenta con su aval.</p>
+  </form>
+</section>
+
+<!-- ============ CAMBIAR CONTRASEÑA ============ -->
+<section id="pCambio" class="acceso" hidden>
+  <form class="caja" id="fCambio">
+    <div class="marca"><img src="icon.svg" alt=""><div id="cTitulo">Crea tu contraseña<small id="cSub">Es tu primer acceso</small></div></div>
+    <p id="cTexto">Escribe la contraseña temporal que te dio Dirección y luego una nueva que solo tú conozcas.</p>
+    <label for="cActual" id="cActualLbl">Contraseña temporal</label>
+    <input id="cActual" type="password" autocomplete="current-password" required>
+    <label for="cNueva">Contraseña nueva</label>
+    <input id="cNueva" type="password" autocomplete="new-password" minlength="6" required>
+    <div class="ayuda">Al menos 6 caracteres.</div>
+    <label for="cNueva2">Repite la contraseña nueva</label>
+    <input id="cNueva2" type="password" autocomplete="new-password" minlength="6" required>
+    <div class="error" id="cError" role="alert"></div>
+    <button class="btn" type="submit" id="cGuardar">Guardar contraseña</button>
+    <div class="pie"><button class="enlace" type="button" id="cCancelar">Cancelar</button></div>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="pApp" hidden>
+  <div id="demoBanda" hidden style="background:#0E7476;color:#fff;font-size:.85rem">
+    <div style="max-width:1040px;margin:0 auto;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.4rem 1rem">
+      <b style="flex:1;min-width:12rem">🎬 Modo demostración · datos ficticios</b>
+      <button type="button" id="demoGuia" style="background:#fff;color:#0E7476;border:0;border-radius:6px;padding:.25rem .6rem;font-weight:700;cursor:pointer">Visita guiada</button>
+      <button type="button" id="demoRol" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.7);border-radius:6px;padding:.25rem .6rem;cursor:pointer">Cambiar de rol</button>
+      <button type="button" id="demoReset" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.7);border-radius:6px;padding:.25rem .6rem;cursor:pointer">Restablecer demo</button>
+    </div>
+  </div>
+  <header class="barra">
+    <div class="dentro">
+      <div class="titulo">CONVIVE360</div>
+      <span class="estado" id="estadoRed">En línea</span>
+      <button class="cuenta" id="btnCuenta" aria-haspopup="true" aria-expanded="false"></button>
+    </div>
+    <div class="menu" id="menuCuenta" hidden>
+      <button id="mInstalar" data-instalar-link hidden>Instalar en este aparato</button>
+      <button id="mCambiar">Cambiar mi contraseña</button>
+      <button id="mActualizar">Actualizar la app</button>
+      <button id="mSalir">Cerrar sesión</button>
+      <div style="padding:.5rem 1rem;font-size:.75rem;color:var(--suave);border-top:1px solid var(--linea)">Versión de la app: <b id="verApp"></b></div>
+    </div>
+    <nav class="pestanas" id="pestanas" role="tablist"></nav>
+  </header>
+  <main>
+    <section id="vInicio"></section>
+    <section id="vUsuarios" hidden></section>
+    <section id="vHistorial" hidden></section>
+    <section id="vBitacora" hidden></section>
+  </main>
+</div>
+
+<!-- Alta / edición de usuario -->
+<dialog id="dUsuario">
+  <form id="fUsuario" method="dialog">
+    <h2 id="duTitulo">Agregar usuario</h2>
+    <label for="duNombre">Nombre completo</label>
+    <input id="duNombre" required autocomplete="off">
+    <div class="ayuda">Como debe aparecer en los reportes.</div>
+    <label for="duUsuario">Usuario para entrar</label>
+    <input id="duUsuario" required autocapitalize="none" spellcheck="false" autocomplete="off" pattern="[a-z][a-z0-9._\-]{2,29}">
+    <div class="ayuda">Minúsculas, sin espacios ni acentos. Por ejemplo: melisa.ruiz</div>
+    <label for="duIniciales">Iniciales para sus folios</label>
+    <input id="duIniciales" required maxlength="4" autocomplete="off" style="text-transform:uppercase">
+    <div class="ayuda" id="duInicialesAyuda">2 a 4 letras. No se pueden repetir entre usuarios.</div>
+    <label for="duRol">Área</label>
+    <select id="duRol">
+      <option value="prefectura">Prefectura</option>
+      <option value="gabinete">Gabinete psicopedagógico</option>
+      <option value="direccion">Dirección</option>
+    </select>
+    <div id="duGradosCaja">
+      <label>Grados a su cargo</label>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:.35rem;margin:0;font-weight:500"><input type="checkbox" value="1°" data-grado style="width:auto"> 1°</label>
+        <label style="display:flex;align-items:center;gap:.35rem;margin:0;font-weight:500"><input type="checkbox" value="2°" data-grado style="width:auto"> 2°</label>
+        <label style="display:flex;align-items:center;gap:.35rem;margin:0;font-weight:500"><input type="checkbox" value="3°" data-grado style="width:auto"> 3°</label>
+      </div>
+      <div class="ayuda">Verá todos los reportes de los alumnos de esos grados (los de Gabinete, solo si Gabinete los comparte). Sin grados, solo ve los suyos.</div>
+    </div>
+    <div class="error" id="duError" role="alert"></div>
+    <div class="botones">
+      <button class="btn sec" type="button" data-cerrar>Cancelar</button>
+      <button class="btn" type="submit" id="duGuardar">Agregar usuario</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Contraseña temporal recién creada -->
+<dialog id="dTemporal">
+  <div class="cuerpo">
+    <h2 id="dtTitulo">Usuario creado</h2>
+    <p>Entrégale estos datos en persona. La contraseña temporal solo se muestra esta vez; al entrar se le pedirá crear la suya. <b>Copiar datos</b> incluye también el enlace de la app y la dirección del servidor.</p>
+    <div class="credencial-nueva" id="dtDatos"></div>
+    <div class="botones">
+      <button class="btn sec" type="button" id="dtCopiar">Copiar datos</button>
+      <button class="btn" type="button" data-cerrar>Listo</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Instalar -->
+<dialog id="dInstalar">
+  <div class="cuerpo">
+    <h2>Instalar CONVIVE360</h2>
+    <div id="diTexto"></div>
+    <div class="botones"><button class="btn" type="button" data-cerrar>Entendido</button></div>
+  </div>
+</dialog>
+
+<!-- Confirmación -->
+<dialog id="dConfirmar">
+  <div class="cuerpo">
+    <h2 id="dcTitulo"></h2>
+    <p id="dcTexto"></p>
+    <div class="botones">
+      <button class="btn sec" type="button" id="dcNo">Cancelar</button>
+      <button class="btn" type="button" id="dcSi"></button>
+    </div>
+  </div>
+</dialog>
+
+<script src="tour.js"></script>
+<script>
+"use strict";
+const APP_VERSION = "8.12";
+const K = { cfg: "sejv8_config", ses: "sejv8_sesion" }; // separado de las claves de la v7 (sej_)
+const ROLES = {
+  prefectura: { etiqueta: "Prefectura", color: "var(--tinta)", sep: "-" },
+  gabinete: { etiqueta: "Gabinete psicopedagógico", color: "var(--gabinete)", sep: "-" },
+  direccion: { etiqueta: "Dirección", color: "var(--direccion)", sep: "X" }
+};
+const ACCIONES_BITACORA = {
+  login: "Inició sesión", cambiarPassword: "Cambió su contraseña", crearUsuario: "Creó un usuario",
+  actualizarUsuario: "Modificó un usuario", restablecerPassword: "Restableció una contraseña",
+  asignarHistorial: "Asignó reportes anteriores", leerTodo: "Consultó todos los reportes"
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const leer = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
+
+let cfg = leer(K.cfg) || { url: "" };
+let ses = leer(K.ses);           // { token, expira, usuario, contadores }
+let usuariosCache = [];
+let vistaActual = "inicio";
+
+// ------------------------------------------------------------
+//  Comunicación con el servidor
+// ------------------------------------------------------------
+class ErrorApi extends Error { constructor(msg, codigo) { super(msg); this.codigo = codigo; } }
+
+// Si en este aparato Google desvía los envíos POST, se usa directo la vía GET (una sola petición en vez de dos).
+async function enviarPeticion(url, cuerpo) {
+  const json = JSON.stringify(cuerpo);
+  if (localStorage.getItem("sejv8_via") === "get" && json.length < 3000) {
+    return (await fetch(url + "?p=" + encodeURIComponent(json))).json();
+  }
+  let d = await (await fetch(url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: json })).json();
+  if (d && d.codigo === "V7_DESACTIVADA") {
+    localStorage.setItem("sejv8_via", "get");
+    d = await (await fetch(url + "?p=" + encodeURIComponent(json))).json();
+  }
+  return d;
+}
+
+async function api(accion, datos = {}, url = cfg.url) {
+  if (!navigator.onLine) throw new ErrorApi("No hay conexión a internet.", "SIN_RED");
+  const cuerpo = Object.assign({ accion }, datos);
+  if (ses && ses.token && !cuerpo.token && accion !== "login") cuerpo.token = ses.token;
+  let d;
+  try {
+    d = await enviarPeticion(url, cuerpo);
+  } catch (e) {
+    if (e instanceof SyntaxError) throw new ErrorApi("El servidor respondió algo inesperado. Revisa la dirección del servidor.", "RESPUESTA");
+    throw new ErrorApi(accion === "ping"
+      ? "No se pudo conectar. Revisa tu internet y que el script esté publicado con acceso para «Cualquier usuario»."
+      : "No se pudo conectar con el servidor. Revisa tu internet.", "SIN_RED");
+  }
+  if (!d.ok) {
+    if (d.codigo === "SESION_INVALIDA" && accion !== "login") { cerrarLocal(d.error); }
+    if (d.codigo === "USUARIO_BAJA" && ses) { ses.usuario.activo = false; guardar(K.ses, ses); }
+    if (d.codigo === "DEBE_CAMBIAR" && ses) { ses.usuario.debeCambiar = true; guardar(K.ses, ses); mostrar(); }
+    throw new ErrorApi(d.error || "Ocurrió un error.", d.codigo);
+  }
+  return d;
+}
+
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function ocupado(btn, si, texto) {
+  if (si) { btn.dataset.txt = btn.textContent; btn.textContent = texto || "Un momento…"; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.txt || btn.textContent; btn.disabled = false; }
+}
+
+// ------------------------------------------------------------
+//  Qué pantalla se ve
+// ------------------------------------------------------------
+function mostrar() {
+  ["pConfig", "pLogin", "pCambio", "pApp"].forEach(id => $(id).hidden = true);
+  if (!cfg.url) { $("cfgVolver").hidden = true; $("pConfig").hidden = false; $("cfgUrl").focus(); return; }
+  if (!ses) { $("demoPanel").hidden = !cfg.demo; $("pLogin").hidden = false; if (!cfg.demo) $("lUsuario").focus(); return; }
+  if (ses.usuario.debeCambiar) { abrirCambio(true); return; }
+  $("pApp").hidden = false;
+  pintarApp();
+}
+
+function sesionVigente(s) { return s && s.token && new Date(s.expira) > new Date(); }
+
+function cerrarLocal(motivo) {
+  ses = null;
+  localStorage.removeItem(K.ses);
+  $("lError").textContent = motivo || "";
+  mostrar();
+}
+
+// ------------------------------------------------------------
+//  Configuración
+// ------------------------------------------------------------
+$("cfgGuardar").addEventListener("click", async () => {
+  const url = $("cfgUrl").value.trim();
+  $("cfgError").textContent = "";
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url) && !/^http:\/\/localhost[:\/]/.test(url)) {
+    $("cfgError").textContent = "La dirección debe empezar con https://script.google.com/macros/s/ y terminar en /exec.";
+    return;
+  }
+  const btn = $("cfgGuardar");
+  ocupado(btn, true, "Probando conexión…");
+  try {
+    const d = await api("ping", {}, url);
+    if (!String(d.version || "").startsWith("8")) throw new ErrorApi("Ese servidor tiene una versión anterior. Instala el script v8.");
+    cfg = { url, demo: !!d.demo }; guardar(K.cfg, cfg);
+    toast("Conectado al servidor.");
+    mostrar();
+  } catch (e) {
+    $("cfgError").textContent = e.message;
+  } finally { ocupado(btn, false); }
+});
+
+$("lCambiarServidor").addEventListener("click", () => {
+  ["pLogin"].forEach(id => $(id).hidden = true);
+  $("cfgUrl").value = cfg.url; $("cfgVolver").hidden = false; $("pConfig").hidden = false;
+});
+document.querySelector('[data-ir="login"]').addEventListener("click", () => { $("pConfig").hidden = true; mostrar(); });
+
+// ------------------------------------------------------------
+//  Iniciar sesión
+// ------------------------------------------------------------
+$("fLogin").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  $("lError").textContent = "";
+  const btn = $("lEntrar");
+  ocupado(btn, true, "Entrando…");
+  try {
+    const d = await api("login", {
+      usuario: $("lUsuario").value.trim(), password: $("lPass").value,
+      dispositivo: (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || ""
+    });
+    ses = { token: d.token, expira: d.expira, usuario: d.usuario, contadores: d.contadores || {} };
+    guardar(K.ses, ses);
+    $("lPass").value = "";
+    vistaActual = "inicio";
+    mostrar();
+  } catch (e) {
+    $("lError").textContent = e.codigo === "SIN_RED" ? "Para entrar la primera vez se necesita internet." : e.message;
+  } finally { ocupado(btn, false); }
+});
+
+// ------------------------------------------------------------
+//  Cambiar contraseña (obligatorio la primera vez o voluntario)
+// ------------------------------------------------------------
+function abrirCambio(obligatorio) {
+  ["pConfig", "pLogin", "pApp"].forEach(id => $(id).hidden = true);
+  $("fCambio").reset(); $("cError").textContent = "";
+  $("cTitulo").firstChild.textContent = obligatorio ? "Crea tu contraseña" : "Cambiar contraseña";
+  $("cSub").textContent = obligatorio ? "Es tu primer acceso" : (ses.usuario.nombre || "");
+  $("cTexto").hidden = !obligatorio;
+  $("cActualLbl").textContent = obligatorio ? "Contraseña temporal" : "Contraseña actual";
+  $("cCancelar").textContent = obligatorio ? "Salir" : "Cancelar";
+  $("cCancelar").onclick = () => obligatorio ? salir() : mostrar();
+  $("pCambio").hidden = false;
+  $("cActual").focus();
+}
+
+$("fCambio").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  $("cError").textContent = "";
+  if ($("cNueva").value !== $("cNueva2").value) { $("cError").textContent = "Las contraseñas nuevas no coinciden."; return; }
+  const btn = $("cGuardar");
+  ocupado(btn, true, "Guardando…");
+  try {
+    const d = await api("cambiarPassword", { actual: $("cActual").value, nueva: $("cNueva").value });
+    ses.usuario = d.usuario; ses.contadores = d.contadores || {};
+    guardar(K.ses, ses);
+    toast("Contraseña guardada.");
+    mostrar();
+  } catch (e) { $("cError").textContent = e.message; }
+  finally { ocupado(btn, false); }
+});
+
+// ------------------------------------------------------------
+//  Cuenta
+// ------------------------------------------------------------
+$("btnCuenta").addEventListener("click", () => {
+  const m = $("menuCuenta"); m.hidden = !m.hidden;
+  $("btnCuenta").setAttribute("aria-expanded", String(!m.hidden));
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest("#menuCuenta") && !e.target.closest("#btnCuenta")) $("menuCuenta").hidden = true;
+});
+$("mCambiar").addEventListener("click", () => {
+  $("menuCuenta").hidden = true;
+  if (!navigator.onLine) { toast("Para cambiar tu contraseña se necesita internet."); return; }
+  abrirCambio(false);
+});
+$("mSalir").addEventListener("click", async () => {
+  $("menuCuenta").hidden = true;
+  const p = await pendientesLocales(ses.usuario);
+  const sinEnviar = (p.reportes || p.notas || p.fotos)
+    ? `Tienes ${p.reportes} reporte(s), ${p.fotos} foto(s) y ${p.notas} nota(s) sin enviar. Se quedarán guardados en este aparato hasta que vuelvas a entrar y sincronices.`
+    : "";
+  const sinTerminar = p.borrador ? " Tienes además una captura o una nota sin terminar de guardar; también se queda en este aparato." : "";
+  const texto = (sinEnviar || sinTerminar)
+    ? `${sinEnviar}${sinTerminar} Para volver a entrar necesitarás internet.`.trim()
+    : "Tus reportes ya están en la nube, así que se quitarán de este aparato. Para volver a entrar necesitarás tu usuario, tu contraseña e internet.";
+  if (await confirmar("Cerrar sesión", texto, "Cerrar sesión")) salir();
+});
+
+// Datos que este usuario tiene en el aparato y aún no llegan a la nube
+function fotosPendientes(u) {
+  return new Promise(res => {
+    try {
+      const r = indexedDB.open("sejv8_fotos_" + u.usuario);
+      r.onsuccess = () => {
+        const db = r.result;
+        if (!db.objectStoreNames.contains("fotos")) { db.close(); return res(0); }
+        const q = db.transaction("fotos").objectStore("fotos").getAll();
+        q.onsuccess = () => { db.close(); res(q.result.filter(f => !f.subida).length); };
+        q.onerror = () => { db.close(); res(0); };
+      };
+      r.onerror = () => res(0);
+    } catch (e) { res(0); }
+  });
+}
+
+async function pendientesLocales(u) {
+  const pre = "sejv8_" + u.usuario + "_";
+  const L = k => { try { return JSON.parse(localStorage.getItem(pre + k)) || []; } catch (e) { return []; } };
+  const esDir = f => !String(f).includes("-") && /X\d{5}$/.test(String(f));
+  const enviados = (u.rol === "direccion" ? L("dir_synced_folios") : L("synced_folios")).map(String);
+  const reportes = L("reports_history").filter(r => r.folio && (u.rol !== "direccion" || esDir(r.folio)) && !enviados.includes(String(r.folio))).length;
+  const notasEnv = L("synced_seguimientos").map(String);
+  const notas = L("seguimientos").filter(n => !notasEnv.includes(String(n.id))).length;
+  const fotos = await fotosPendientes(u);
+  // Captura o nota de seguimiento que se estaba escribiendo y aún no se guarda
+  let borrador = false;
+  try { const d = JSON.parse(localStorage.getItem(pre + "borrador")); borrador = !!(d && d.v === 1 && Date.now() - d.t < 7 * 864e5); } catch (e) { }
+  try { if (Object.keys(JSON.parse(localStorage.getItem(pre + "segborrador")) || {}).length) borrador = true; } catch (e) { }
+  return { reportes, notas, fotos, borrador };
+}
+
+async function salir() {
+  const u = ses && ses.usuario;
+  try { if (navigator.onLine && ses) await api("logout"); } catch (e) { }
+  if (u) {
+    const p = await pendientesLocales(u);
+    if (!p.reportes && !p.notas && !p.fotos && !p.borrador) {
+      Object.keys(localStorage).filter(k => k.startsWith("sejv8_" + u.usuario + "_")).forEach(k => localStorage.removeItem(k));
+      try { indexedDB.deleteDatabase("sejv8_fotos_" + u.usuario); } catch (e) { }
+      try { indexedDB.deleteDatabase("sejv8_borrador_" + u.usuario); } catch (e) { }
+    }
+  }
+  cerrarLocal("");
+}
+
+// ------------------------------------------------------------
+//  App
+// ------------------------------------------------------------
+function pintarApp() {
+  const u = ses.usuario;
+  if (u.rol !== "direccion" && u.activo !== false && !/[?&]cuenta/.test(location.search)) { location.replace("captura.html"); return; }
+  $("demoBanda").hidden = !ses.demo;
+  $("demoReset").hidden = u.rol !== "direccion";
+  if (ses.demo && u.rol === "direccion") setTimeout(() => window.CV360Tour && CV360Tour.iniciar("inicio-direccion"), 300);
+  $("btnCuenta").textContent = u.nombre.split(/\s+/)[0] + " ▾";
+  const pest = [["inicio", "Inicio"]];
+  if (u.rol === "direccion") pest.push(["reportes", "Reportes y expedientes"], ["usuarios", "Usuarios"], ["historial", "Reportes anteriores"], ["bitacora", "Bitácora"]);
+  if (!pest.some(p => p[0] === vistaActual)) vistaActual = "inicio";
+  $("pestanas").innerHTML = pest.map(([id, t]) =>
+    `<button role="tab" data-vista="${id}" aria-selected="${id === vistaActual}">${t}</button>`).join("");
+  $("pestanas").hidden = pest.length < 2;
+  $("pestanas").querySelectorAll("button").forEach(b => b.onclick = () => b.dataset.vista === "reportes" ? location.href = "direccion.html" : irA(b.dataset.vista));
+  irA(vistaActual);
+  pintarRed();
+  pintarInstalar();
+}
+
+function irA(vista) {
+  vistaActual = vista;
+  $("pestanas").querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.vista === vista)));
+  ["inicio", "usuarios", "historial", "bitacora"].forEach(v => $("v" + v[0].toUpperCase() + v.slice(1)).hidden = v !== vista);
+  ({ inicio: pintarInicio, usuarios: cargarUsuarios, historial: cargarHistorial, bitacora: cargarBitacora })[vista]();
+}
+
+function pintarInicio() {
+  const u = ses.usuario, rol = ROLES[u.rol];
+  const cont = ses.contadores || {};
+  const prefijos = Object.keys(cont).sort();
+  const ejemplo = `${u.iniciales}1A${rol.sep}00001`;
+  const filas = prefijos.map(p => `<tr><td data-t="Grado y grupo">${esc(p.slice(u.iniciales.length))}</td><td data-t="Último folio"><b>${esc(p + rol.sep + String(cont[p]).padStart(5, "0"))}</b></td></tr>`).join("");
+  $("vInicio").innerHTML = `
+    <div class="aviso" data-instalar hidden></div>
+    ${u.activo === false ? `<div class="aviso"><b>Tu usuario fue dado de baja.</b> Puedes entregar lo que capturaste antes, pero ya no consultar información.</div>` : ""}
+    <div class="credencial" style="--color-area:${rol.color}">
+      <div class="sello"><b>${esc(u.iniciales)}</b><span>tus folios</span></div>
+      <div>
+        <h1>${esc(u.nombre)}</h1>
+        <div class="area">${esc(rol.etiqueta)}</div>
+        <div class="ejemplo">Tus folios se ven así: ${esc(ejemplo)}</div>
+      </div>
+    </div>
+    ${u.rol === "direccion" ? avisoAlumnosHtml() + `
+      <div class="bloque">
+        <h2>Administración</h2>
+        <p>Desde aquí das de alta al personal, asignas los reportes que se capturaron antes con las terminales v7 y revisas quién ha entrado al sistema.</p>
+        <p><a class="btn" href="direccion.html" style="display:inline-block;text-decoration:none">Abrir reportes y expedientes</a></p>
+      </div>` : `
+      <div class="bloque">
+        <h2>Tus folios</h2>
+        ${prefijos.length ? `<p>Último folio que usaste en cada grupo. El siguiente reporte continuará desde aquí, aunque no tengas internet.</p>
+          <table class="tabla"><thead><tr><th>Grado y grupo</th><th>Último folio</th></tr></thead><tbody>${filas}</tbody></table>`
+        : `<p class="vacio">Aún no tienes reportes. Tu primer folio en cada grupo será el 00001.</p>`}
+        <p><a class="btn" href="captura.html" style="display:inline-block;text-decoration:none">Capturar reportes</a></p>
+      </div>`}
+  `;
+}
+
+// ------------------------------------------------------------
+//  Dirección: alumnos con 3 o más reportes en 30 días
+//  (con los reportes que la terminal de Dirección descargó en este aparato)
+// ------------------------------------------------------------
+const ALERTA_REPORTES = 3, ALERTA_DIAS = 30;
+function alumnosEnAlerta(u) {
+  let hist = [];
+  try { hist = JSON.parse(localStorage.getItem("sejv8_" + u.usuario + "_reports_history")) || []; } catch (e) { }
+  const norm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+  const fecha = r => {
+    const f = String(r.eventDate || "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return new Date(f + "T12:00:00");
+    const t = Number(r.id) > 1e12 ? new Date(Number(r.id)) : (r.timestamp ? new Date(r.timestamp) : null);
+    return t && !isNaN(t) ? t : null;
+  };
+  const codigoPorNombre = {};
+  hist.forEach(r => { if (r.alumnoCodigo && r.studentName) codigoPorNombre[norm(r.studentName)] = r.alumnoCodigo; });
+  const desde = Date.now() - ALERTA_DIAS * 864e5, hasta = Date.now() + 864e5, grupos = {};
+  hist.forEach(r => {
+    if (!String(r.studentName || "").trim()) return;
+    const f = fecha(r);
+    if (!f || f.getTime() < desde || f.getTime() > hasta) return;
+    const cod = r.alumnoCodigo || codigoPorNombre[norm(r.studentName)];
+    const k = cod ? "c:" + cod : "n:" + norm(r.studentName);
+    const g = grupos[k] || (grupos[k] = { nombre: r.studentName, grado: r.studentGrade, grupo: r.studentGroup, n: 0, graves: 0, ultima: 0 });
+    g.n++;
+    if (r.format === "grave") g.graves++;
+    if (f.getTime() >= g.ultima) Object.assign(g, { ultima: f.getTime(), nombre: r.studentName, grado: r.studentGrade, grupo: r.studentGroup });
+  });
+  return Object.values(grupos).filter(g => g.n >= ALERTA_REPORTES).sort((a, b) => b.n - a.n || b.ultima - a.ultima);
+}
+
+function avisoAlumnosHtml() {
+  const u = ses.usuario;
+  const ultima = localStorage.getItem("sejv8_" + u.usuario + "_ultima_sync");
+  const cuando = ultima ? `Datos de la última sincronización: ${fechaCorta(ultima)}` : "Aún no has sincronizado en este aparato";
+  const lista = alumnosEnAlerta(u);
+  if (!lista.length) {
+    return `<div class="bloque" style="border-left:6px solid var(--ok)">
+      <h2 style="margin-bottom:.3rem">Sin alertas de alumnos</h2>
+      <p class="ayuda" style="margin:0">Ningún alumno tiene ${ALERTA_REPORTES} o más reportes en los últimos ${ALERTA_DIAS} días.<br>${cuando}. <a href="direccion.html">Abrir reportes</a> para sincronizar.</p></div>`;
+  }
+  return `<div class="bloque" style="border:1px solid #FECDCA;border-left:6px solid var(--alerta);background:#FEF3F2">
+    <h2 style="color:var(--alerta)">⚠️ ${lista.length} alumno(s) con ${ALERTA_REPORTES} o más reportes en ${ALERTA_DIAS} días</h2>
+    <div style="display:flex;flex-direction:column;gap:.4rem;margin:.6rem 0">
+      ${lista.map(g => `<a href="direccion.html?expediente=${encodeURIComponent(g.nombre)}" style="display:flex;justify-content:space-between;gap:1rem;align-items:center;background:#fff;border:1px solid #FDA29B;border-radius:8px;padding:.55rem .8rem;text-decoration:none;color:var(--texto)">
+        <span><b>${esc(g.nombre)}</b> <span style="color:var(--suave)">${esc(g.grado || "")} ${esc(g.grupo || "")}</span></span>
+        <span style="white-space:nowrap;font-weight:700;color:var(--alerta)">${g.n} reportes${g.graves ? ` · ${g.graves} grave${g.graves > 1 ? "s" : ""}` : ""} ›</span></a>`).join("")}
+    </div>
+    <p class="ayuda" style="margin:0">Toca un alumno para abrir su expediente.<br>${cuando}.</p></div>`;
+}
+
+function pintarRed() {
+  const e = $("estadoRed");
+  e.textContent = navigator.onLine ? "En línea" : "Sin conexión";
+  e.classList.toggle("fuera", !navigator.onLine);
+}
+window.addEventListener("online", () => { pintarRed(); refrescarSesion(); });
+window.addEventListener("offline", pintarRed);
+
+// Al abrir con internet, confirma que la sesión sigue vigente y actualiza los contadores.
+async function refrescarSesion() {
+  if (!ses || !navigator.onLine) return;
+  try {
+    const d = await api("sesion");
+    ses.usuario = d.usuario; ses.contadores = d.contadores || {};
+    guardar(K.ses, ses);
+    if (!$("pApp").hidden) { if (ses.usuario.debeCambiar) mostrar(); else if (vistaActual === "inicio") pintarInicio(); }
+  } catch (e) { /* sin red o sesión cerrada: api() ya se encargó */ }
+}
+
+// ------------------------------------------------------------
+//  Dirección: usuarios
+// ------------------------------------------------------------
+function sinRedHtml(texto) {
+  return `<div class="bloque"><p class="vacio">${esc(texto || "Esta sección necesita internet. Conéctate e inténtalo de nuevo.")}</p></div>`;
+}
+
+async function cargarUsuarios() {
+  const v = $("vUsuarios");
+  v.innerHTML = `<div class="bloque"><p class="vacio">Cargando usuarios…</p></div>`;
+  try {
+    usuariosCache = (await api("listarUsuarios")).usuarios;
+    pintarUsuarios();
+  } catch (e) { v.innerHTML = sinRedHtml(e.message); }
+}
+
+function estadoUsuario(u) {
+  if (!u.activo) return `<span class="etiqueta e-baja">Baja</span>`;
+  if (u.debeCambiar) return `<span class="etiqueta e-temporal">Sin primer acceso</span>`;
+  return `<span class="etiqueta" style="color:var(--ok)">Activo</span>`;
+}
+
+function fechaCorta(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return isNaN(d) ? "—" : d.toLocaleString("es-MX", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function pintarUsuarios() {
+  const orden = { direccion: 0, prefectura: 1, gabinete: 2 };
+  const lista = usuariosCache.slice().sort((a, b) => (b.activo - a.activo) || (orden[a.rol] - orden[b.rol]) || a.nombre.localeCompare(b.nombre));
+  $("vUsuarios").innerHTML = `
+    <div class="bloque">
+      <div class="encabezado"><h2>Usuarios</h2><button class="btn" id="btnNuevo">Agregar usuario</button></div>
+      <table class="tabla">
+        <thead><tr><th>Nombre</th><th>Usuario</th><th>Iniciales</th><th>Área</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead>
+        <tbody>${lista.map(u => `
+          <tr class="${u.activo ? "" : "inactivo"}">
+            <td><b>${esc(u.nombre)}</b></td>
+            <td data-t="Usuario">${esc(u.usuario)}</td>
+            <td data-t="Iniciales" class="ini">${esc(u.iniciales)}</td>
+            <td><span class="etiqueta r-${esc(u.rol)}">${esc((ROLES[u.rol] || {}).etiqueta || u.rol)}</span>${u.rol === "prefectura" && (u.grados || []).length ? `<div class="ayuda" style="margin-top:.25rem">Grados: ${esc(u.grados.join(", "))}</div>` : ""}</td>
+            <td>${estadoUsuario(u)}</td>
+            <td data-t="Último acceso">${fechaCorta(u.ultimoAcceso)}</td>
+            <td><div class="acciones">
+              <button class="btn sec chico" data-editar="${esc(u.usuario)}">Editar</button>
+              ${u.activo ? `<button class="btn sec chico" data-reset="${esc(u.usuario)}">Nueva contraseña</button>` : ""}
+              <button class="btn sec chico" data-activo="${esc(u.usuario)}">${u.activo ? "Dar de baja" : "Reactivar"}</button>
+            </div></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+  $("btnNuevo").onclick = () => abrirUsuario(null);
+  $("vUsuarios").querySelectorAll("[data-editar]").forEach(b => b.onclick = () => abrirUsuario(b.dataset.editar));
+  $("vUsuarios").querySelectorAll("[data-reset]").forEach(b => b.onclick = () => restablecer(b.dataset.reset));
+  $("vUsuarios").querySelectorAll("[data-activo]").forEach(b => b.onclick = () => cambiarActivo(b.dataset.activo));
+}
+
+const sinAcentos = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+function inicialesSugeridas(nombre) {
+  const p = sinAcentos(nombre).toUpperCase().replace(/[^A-ZÑ ]/g, "").split(/\s+/).filter(Boolean);
+  if (!p.length) return "";
+  return p.length === 1 ? p[0].slice(0, 2) : p[0][0] + p[p.length - 1][0];
+}
+function usuarioSugerido(nombre) {
+  const p = sinAcentos(nombre).toLowerCase().replace(/[^a-z ]/g, "").split(/\s+/).filter(Boolean);
+  if (!p.length) return "";
+  return p.length === 1 ? p[0] : p[0] + "." + p[p.length - 1];
+}
+
+let editando = null, tocadoUsuario = false, tocadoIniciales = false;
+function abrirUsuario(usuario) {
+  editando = usuario ? usuariosCache.find(u => u.usuario === usuario) : null;
+  $("fUsuario").reset(); $("duError").textContent = "";
+  tocadoUsuario = tocadoIniciales = !!editando;
+  $("duTitulo").textContent = editando ? "Editar usuario" : "Agregar usuario";
+  $("duGuardar").textContent = editando ? "Guardar cambios" : "Agregar usuario";
+  $("duUsuario").disabled = !!editando;
+  if (editando) {
+    $("duNombre").value = editando.nombre; $("duUsuario").value = editando.usuario;
+    $("duIniciales").value = editando.iniciales; $("duRol").value = editando.rol;
+  }
+  const marcados = (editando && editando.grados) || [];
+  document.querySelectorAll("[data-grado]").forEach(c => { c.checked = marcados.indexOf(c.value) >= 0; });
+  $("duGradosCaja").hidden = $("duRol").value !== "prefectura";
+  revisarIniciales();
+  $("dUsuario").showModal();
+  $("duNombre").focus();
+}
+
+$("duNombre").addEventListener("input", () => {
+  if (!tocadoUsuario) $("duUsuario").value = usuarioSugerido($("duNombre").value);
+  if (!tocadoIniciales) $("duIniciales").value = inicialesSugeridas($("duNombre").value);
+  revisarIniciales();
+});
+$("duUsuario").addEventListener("input", () => { tocadoUsuario = true; });
+$("duIniciales").addEventListener("input", () => { tocadoIniciales = true; revisarIniciales(); });
+$("duRol").addEventListener("change", () => { $("duGradosCaja").hidden = $("duRol").value !== "prefectura"; });
+
+function revisarIniciales() {
+  const ini = sinAcentos($("duIniciales").value).toUpperCase().trim();
+  const otro = usuariosCache.find(u => u.iniciales === ini && (!editando || u.usuario !== editando.usuario));
+  const ayuda = $("duInicialesAyuda");
+  if (otro) {
+    const partes = sinAcentos($("duNombre").value).toUpperCase().split(/\s+/).filter(Boolean);
+    const extra = ((partes[partes.length - 1] || "")[1] || "A").replace(/[^A-Z]/, "A");
+    ayuda.innerHTML = `<span style="color:var(--alerta);font-weight:600">${esc(ini)} ya son de ${esc(otro.nombre)}.</span> Agrega una letra, por ejemplo ${esc(ini.slice(0, 3) + extra)}.`;
+  } else if (editando && ini !== editando.iniciales) {
+    ayuda.textContent = "Al cambiar las iniciales, solo sus reportes nuevos usarán las nuevas. Los anteriores conservan su folio.";
+  } else {
+    ayuda.textContent = "2 a 4 letras. No se pueden repetir entre usuarios.";
+  }
+  return !otro;
+}
+
+document.querySelectorAll("[data-cerrar]").forEach(b => b.addEventListener("click", () => b.closest("dialog").close()));
+
+$("fUsuario").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  $("duError").textContent = "";
+  if (!revisarIniciales()) { $("duError").textContent = "Esas iniciales ya están en uso."; return; }
+  const datos = {
+    nombre: $("duNombre").value.trim(), usuario: $("duUsuario").value.trim().toLowerCase(),
+    iniciales: sinAcentos($("duIniciales").value).toUpperCase().trim(), rol: $("duRol").value,
+    grados: $("duRol").value === "prefectura" ? [...document.querySelectorAll("[data-grado]:checked")].map(c => c.value) : []
+  };
+  const btn = $("duGuardar");
+  ocupado(btn, true, "Guardando…");
+  try {
+    if (editando) {
+      await api("actualizarUsuario", { usuario: editando.usuario, nombre: datos.nombre, iniciales: datos.iniciales, rol: datos.rol, grados: datos.grados });
+      $("dUsuario").close(); toast("Cambios guardados.");
+    } else {
+      const d = await api("crearUsuario", datos);
+      $("dUsuario").close();
+      mostrarTemporal("Usuario creado", d.usuario, d.passwordTemporal);
+    }
+    cargarUsuarios();
+  } catch (e) { $("duError").textContent = e.message; }
+  finally { ocupado(btn, false); }
+});
+
+function urlApp() { return location.href.split("#")[0].split("?")[0]; }
+function mostrarTemporal(titulo, u, pass) {
+  $("dtTitulo").textContent = titulo;
+  $("dtDatos").innerHTML = `${esc(u.nombre)}<br>Usuario: <b>${esc(u.usuario)}</b><br>Contraseña temporal: <b>${esc(pass)}</b>`;
+  $("dtCopiar").onclick = async () => {
+    const texto = `CONVIVE360\n1) Abre la app: ${urlApp()}\n2) La primera vez, en "Dirección del servidor" pega:\n${cfg.url}\n3) Usuario: ${u.usuario}\n4) Contraseña temporal: ${pass}\nAl entrar se te pedirá crear tu propia contraseña.`;
+    try { await navigator.clipboard.writeText(texto); toast("Datos copiados."); }
+    catch (e) { toast("No se pudo copiar; anótalos a mano."); }
+  };
+  $("dTemporal").showModal();
+}
+
+async function restablecer(usuario) {
+  const u = usuariosCache.find(x => x.usuario === usuario);
+  if (!await confirmar("Nueva contraseña", `Se creará una contraseña temporal para ${u.nombre} y se cerrarán sus sesiones abiertas en todos sus aparatos. Lo que tenga sin enviar se conserva y podrá enviarlo al volver a entrar.`, "Crear contraseña temporal")) return;
+  try {
+    const d = await api("restablecerPassword", { usuario });
+    mostrarTemporal("Contraseña restablecida", u, d.passwordTemporal);
+    cargarUsuarios();
+  } catch (e) { toast(e.message); }
+}
+
+async function cambiarActivo(usuario) {
+  const u = usuariosCache.find(x => x.usuario === usuario);
+  const baja = u.activo;
+  const ok = await confirmar(baja ? "Dar de baja" : "Reactivar",
+    baja ? `${u.nombre} ya no podrá consultar nada en el sistema. Los reportes que capturó antes de hoy sí se recibirán si aún no los envía. Sus reportes en la nube no se borran.`
+         : `${u.nombre} podrá volver a entrar con su contraseña.`,
+    baja ? "Dar de baja" : "Reactivar", baja);
+  if (!ok) return;
+  try {
+    await api("actualizarUsuario", { usuario, activo: !baja });
+    toast(baja ? "Usuario dado de baja." : "Usuario reactivado.");
+    cargarUsuarios();
+  } catch (e) { toast(e.message); }
+}
+
+// ------------------------------------------------------------
+//  Dirección: reportes anteriores (v6/v7) sin usuario
+// ------------------------------------------------------------
+async function cargarHistorial() {
+  const v = $("vHistorial");
+  v.innerHTML = `<div class="bloque"><p class="vacio">Buscando reportes anteriores…</p></div>`;
+  try {
+    const [h, us] = await Promise.all([api("historialSinAsignar"), api("listarUsuarios")]);
+    usuariosCache = us.usuarios;
+    const pend = h.pendientes;
+    const opciones = sel => `<option value="">Elegir usuario…</option>` + usuariosCache
+      .map(u => `<option value="${esc(u.usuario)}" ${u.usuario === sel ? "selected" : ""}>${esc(u.nombre)} (${esc(u.iniciales)})</option>`).join("");
+    v.innerHTML = `
+      <div class="bloque">
+        <h2>Reportes anteriores sin asignar</h2>
+        <p>Son reportes capturados con las terminales v7. Asígnalos a la persona que los hizo para que sus notas de seguimiento le lleguen y su numeración continúe sin repetir folios.</p>
+        ${pend.length ? `<table class="tabla"><thead><tr><th>Capturó</th><th>Hoja</th><th>Reportes</th><th>Asignar a</th><th></th></tr></thead><tbody>
+          ${pend.map((p, i) => `<tr>
+            <td><b>${esc(p.nombre)}</b>${p.sugerido ? `<div class="ayuda">Coincide con un usuario</div>` : ""}</td>
+            <td data-t="Hoja">${p.hoja === "ReportesDireccion" ? "Dirección" : "Prefectura y Gabinete"}</td>
+            <td data-t="Reportes">${p.reportes}</td>
+            <td><select data-sel="${i}" aria-label="Asignar reportes de ${esc(p.nombre)}">${opciones(p.sugerido)}</select></td>
+            <td><div class="acciones"><button class="btn chico" data-asignar="${i}">Asignar</button></div></td>
+          </tr>`).join("")}</tbody></table>`
+        : `<p class="vacio">Todos los reportes anteriores ya tienen usuario.</p>`}
+      </div>`;
+    v.querySelectorAll("[data-asignar]").forEach(b => b.onclick = async () => {
+      const p = pend[b.dataset.asignar];
+      const usuario = v.querySelector(`[data-sel="${b.dataset.asignar}"]`).value;
+      if (!usuario) { toast("Elige a qué usuario asignarlos."); return; }
+      const u = usuariosCache.find(x => x.usuario === usuario);
+      if (!await confirmar("Asignar reportes", `Los ${p.reportes} reportes capturados por “${p.nombre}” quedarán a nombre de ${u.nombre}. Esto no se puede deshacer desde la app.`, "Asignar")) return;
+      try {
+        const d = await api("asignarHistorial", { hoja: p.hoja, nombre: p.nombre, usuario });
+        toast(`${d.asignados} reportes asignados a ${u.nombre}.`);
+        cargarHistorial();
+      } catch (e) { toast(e.message); }
+    });
+  } catch (e) { v.innerHTML = sinRedHtml(e.message); }
+}
+
+// ------------------------------------------------------------
+//  Dirección: bitácora
+// ------------------------------------------------------------
+async function cargarBitacora() {
+  const v = $("vBitacora");
+  v.innerHTML = `<div class="bloque"><p class="vacio">Cargando…</p></div>`;
+  try {
+    const ev = (await api("leerBitacora")).eventos;
+    v.innerHTML = `<div class="bloque"><h2>Bitácora</h2><p class="ayuda">Accesos y cambios de usuarios, del más reciente al más antiguo.</p>
+      ${ev.length ? `<ul class="lista-bitacora">${ev.map(e => `<li><b>${esc(e.usuario)}</b> ${esc((ACCIONES_BITACORA[e.accion] || e.accion).toLowerCase())}${e.detalle ? `: ${esc(e.detalle)}` : ""}<br><small>${fechaCorta(e.fecha)}</small></li>`).join("")}</ul>`
+      : `<p class="vacio">Sin movimientos todavía.</p>`}</div>`;
+  } catch (e) { v.innerHTML = sinRedHtml(e.message); }
+}
+
+// ------------------------------------------------------------
+//  Confirmación
+// ------------------------------------------------------------
+function confirmar(titulo, texto, si, peligro) {
+  return new Promise(res => {
+    $("dcTitulo").textContent = titulo; $("dcTexto").textContent = texto; $("dcSi").textContent = si;
+    $("dcSi").className = "btn" + (peligro ? " peligro" : "");
+    const d = $("dConfirmar");
+    const fin = v => { d.close(); res(v); };
+    $("dcSi").onclick = () => fin(true); $("dcNo").onclick = () => fin(false);
+    d.oncancel = () => res(false);
+    d.showModal();
+  });
+}
+
+// Descarga de nuevo la app completa (lo capturado y la sesión se conservan)
+$("verApp").textContent = APP_VERSION;
+$("mActualizar").addEventListener("click", async () => {
+  $("menuCuenta").hidden = true;
+  if (!navigator.onLine) { toast("Para actualizar se necesita internet."); return; }
+  toast("Actualizando la app…");
+  try {
+    if ("caches" in window) for (const k of await caches.keys()) await caches.delete(k);
+    if (navigator.serviceWorker) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+  } catch (e) { }
+  setTimeout(() => location.reload(), 600);
+});
+
+// ------------------------------------------------------------
+//  Instalar como app
+// ------------------------------------------------------------
+let avisoInstalar = null;
+const ua = navigator.userAgent;
+const esIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const esAndroid = /Android/i.test(ua);
+const enNavegadorInterno = /FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua);
+const instalada = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+// Enlaces "Instalar" (siempre que no esté instalada) y aviso destacado (cuando el aparato lo permite)
+function pintarInstalar() {
+  document.querySelectorAll("[data-instalar-link]").forEach(el => el.hidden = instalada());
+  document.querySelectorAll("[data-instalar]").forEach(el => {
+    const mostrar = !instalada() && (avisoInstalar || esIOS || esAndroid);
+    el.hidden = !mostrar;
+    if (!mostrar) return;
+    el.innerHTML = `<b>Instala la app en este aparato</b> para abrirla con un toque y usarla sin internet.
+      <div style="margin-top:.6rem"><button class="btn chico" type="button">Instalar CONVIVE360</button></div>`;
+    el.querySelector("button").onclick = instalar;
+  });
+}
+const mostrarBotonesInstalar = pintarInstalar;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); avisoInstalar = e; pintarInstalar(); });
+window.addEventListener("appinstalled", () => { avisoInstalar = null; pintarInstalar(); toast("App instalada. Búscala como «CONVIVE360» entre tus aplicaciones."); });
+
+async function instalar() {
+  $("menuCuenta").hidden = true;
+  if (avisoInstalar) {
+    avisoInstalar.prompt();
+    const r = await avisoInstalar.userChoice.catch(() => null);
+    avisoInstalar = null; pintarInstalar();
+    if (r && r.outcome === "accepted") return;
+  }
+  let html;
+  if (enNavegadorInterno) {
+    html = `<p>Estás dentro de otra app (WhatsApp, Facebook…), y ahí no se puede instalar.</p>
+      <p>Abre el menú <b>⋮</b> o <b>…</b> y elige <b>Abrir en el navegador</b> (Chrome o Safari). Ahí vuelve a pulsar «Instalar».</p>`;
+  } else if (esIOS) {
+    html = `<p>En iPhone o iPad se instala desde <b>Safari</b>:</p>
+      <ol><li>Toca el botón <b>Compartir</b> (el cuadro con una flecha hacia arriba).</li>
+      <li>Elige <b>Agregar a pantalla de inicio</b>.</li><li>Toca <b>Agregar</b>.</li></ol>
+      <p class="ayuda">Si usas Chrome en iPhone, el botón Compartir está junto a la barra de direcciones.</p>`;
+  } else if (esAndroid) {
+    html = `<p>En Android, desde <b>Chrome</b>:</p>
+      <ol><li>Toca el menú <b>⋮</b> (arriba a la derecha).</li><li>Elige <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.</li></ol>
+      <p><b>Si dice que ya está instalada</b>, búscala como <b>CONVIVE360</b> en el cajón de aplicaciones (desliza hacia arriba en la pantalla de inicio). Si no aparece, ve a <b>Ajustes → Aplicaciones</b>, desinstala «CONVIVE360» y vuelve a instalarla desde aquí.</p>`;
+  } else {
+    html = `<p>En computadora, desde <b>Chrome</b> o <b>Edge</b>:</p>
+      <ol><li>Busca el ícono de instalar (una pantalla con flecha) al final de la barra de direcciones.</li>
+      <li>O abre el menú <b>⋮</b> → <b>Transmitir, guardar y compartir</b> → <b>Instalar página como app</b>.</li></ol>
+      <p><b>Si dice que ya está instalada</b>: escribe <code>chrome://apps</code> en la barra de direcciones; ahí aparece «CONVIVE360». Si no abre, haz clic derecho sobre ella → <b>Quitar de Chrome</b> y vuelve a instalarla.</p>`;
+  }
+  $("diTexto").innerHTML = html;
+  $("dInstalar").showModal();
+}
+document.querySelectorAll("[data-instalar-btn], #mInstalar").forEach(b => b.addEventListener("click", instalar));
+mostrarBotonesInstalar();
+
+// ------------------------------------------------------------
+//  Arranque
+// ------------------------------------------------------------
+if (ses && !sesionVigente(ses)) { ses = null; localStorage.removeItem(K.ses); $("lError").textContent = "Tu sesión venció. Inicia sesión de nuevo."; }
+// ------------------------------------------------------------
+//  Modo demostración
+// ------------------------------------------------------------
+document.querySelectorAll("[data-demo]").forEach(b => b.addEventListener("click", async () => {
+  ocupado(b, true, "Entrando…");
+  try {
+    const d = await api("loginDemo", { rol: b.dataset.demo });
+    ses = { token: d.token, expira: d.expira, usuario: d.usuario, contadores: d.contadores || {}, demo: true };
+    guardar(K.ses, ses);
+    if (d.usuario.rol === "direccion") await precargarDemoDireccion();
+    if (window.CV360Tour) CV360Tour.activar($("demoTour").checked);
+    vistaActual = "inicio";
+    mostrar();
+  } catch (e) { $("lError").textContent = e.message; }
+  finally { ocupado(b, false); }
+}));
+// Para que el Inicio de Dirección muestre sus alertas desde el primer momento en la demostración
+async function precargarDemoDireccion() {
+  try {
+    const t = await api("leerTodo");
+    const pre = "sejv8_" + ses.usuario.usuario + "_";
+    const lista = [].concat(t.reportes || [], t.reportesDireccion || []).map((r, i) => Object.assign({}, r, { id: Number(r.id) || (Date.now() + i), folio: String(r.folio || "") }));
+    localStorage.setItem(pre + "reports_history", JSON.stringify(lista));
+    localStorage.setItem(pre + "ultima_sync", new Date().toISOString());
+  } catch (e) { }
+}
+function salirDemo() {
+  const u = ses && ses.usuario;
+  if (u) Object.keys(localStorage).filter(k => k.startsWith("sejv8_" + u.usuario + "_")).forEach(k => localStorage.removeItem(k));
+  if (window.CV360Tour) CV360Tour.salir();
+  cerrarLocal("");
+}
+$("demoRol").addEventListener("click", salirDemo);
+$("demoGuia").addEventListener("click", () => { if (window.CV360Tour) CV360Tour.reiniciar("inicio-direccion"); });
+$("demoReset").addEventListener("click", async () => {
+  if (!await confirmar("Restablecer demostración", "Se borrará todo lo capturado durante la demostración y se cargarán de nuevo los datos de ejemplo.", "Restablecer")) return;
+  try {
+    toast("Restableciendo…");
+    await api("restablecerDemo");
+    Object.keys(localStorage).filter(k => k.startsWith("sejv8_demo.")).forEach(k => localStorage.removeItem(k));
+    await precargarDemoDireccion();
+    toast("Demostración restablecida.");
+    pintarApp();
+  } catch (e) { toast(e.message); }
+});
+
+// «Cambiar de rol» desde Prefectura, Gabinete o la terminal de Dirección
+if (/[?&]salirDemo/.test(location.search)) { history.replaceState(null, "", location.pathname); if (ses && ses.demo) salirDemo(); }
+
+// Enlace directo a un servidor: …/?servidor=https://script.google.com/…/exec
+(async function servidorDesdeEnlace() {
+  const url = new URLSearchParams(location.search).get("servidor");
+  if (!url) return;
+  history.replaceState(null, "", location.pathname);
+  if (url === cfg.url) return;
+  if (ses && !confirm("Este enlace conecta la app con otro servidor y cerrará la sesión actual en este aparato. ¿Continuar?")) return;
+  try {
+    const d = await api("ping", {}, url);
+    cfg = { url, demo: !!d.demo }; guardar(K.cfg, cfg);
+    ses = null; localStorage.removeItem(K.ses);
+    mostrar();
+  } catch (e) { toast("No se pudo conectar con el servidor del enlace."); }
+})();
+// Actualiza en silencio si el servidor configurado es de demostración
+if (cfg.url && navigator.onLine) api("ping").then(d => { const demo = !!d.demo; if (demo !== !!cfg.demo) { cfg.demo = demo; guardar(K.cfg, cfg); if (!ses) mostrar(); } }).catch(() => { });
+
+mostrar();
+pintarInstalar();
+refrescarSesion();
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(r => r.update()).catch(() => { });
+</script>
+</body>
+</html>
